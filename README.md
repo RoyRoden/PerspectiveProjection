@@ -5,12 +5,12 @@ PerspectiveProjection is a Unity package intended for camera frustum projection,
 * Tested with Unity 2021 LTS HDRP, in Editor and Play mode.
 * Intended for projection onto one single screen (might work with multiple ones with some extra work).
 * This solution does not rely on any particular camera tracking method which must be implemented separately.
-* It is not intented for production work, is an explorative project and it hasn't been thoroughly tested.
+* It is NOT intented for production work, is an explorative project and it hasn't been thoroughly tested.
 
 ## Usage
 ### Installation
-* Import the package
-* Locate the ScreenProjection prefap (PerspectiveProjection > Prefabs) and place it in the scene
+* Import PerspectiveProjection.unitypackage into a project.
+* Locate the ScreenProjection prefap (PerspectiveProjection > Prefabs) and place it in the scene.
 
 ### Position, resolution and scale
 The ScreenProjection prefab contains a quad that represents the physical screen position and dimension relative to the virtual world. The visible side of the quad represents the front of the physical screent. Use the transform gizmo for positioning the ScreenProjection prefab where preferred. 
