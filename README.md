@@ -42,4 +42,4 @@ Then set its real-world size and scene scale as follows:
 The PerspectiveProjection.cs script contains a snippet from https://rosettacode.org/wiki/Gaussian_elimination available under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/).
 
 ## License
-License: Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) https://creativecommons.org/licenses/by-sa/4.0/
+[Unlicense license](https://unlicense.org/)
