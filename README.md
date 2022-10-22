@@ -28,7 +28,7 @@ The set screen real-world size and scene scale as follows:
 **Note:** By rescaling PerspectiveProjection following the above steps, you will notice that CameraOrigin scale values will also change accordingly. This ensures that the tracked camera movements in the real-world are properly scaled in the Unity scene.
 
 ### Camera Tracking and Positioning
-This package should work with any tracking method (i.e. Vive Tracker) that allows to mirror the position of a real-world camera to that of the CaptureCamera gameobject in the scene.
+This package should work with any tracking method (i.e. Vive Tracker) that allows to mirror the position of a real-world camera to that of the TrackedCamera gameobject in the scene.
 
 * To position the camera in relation to the screen (ScreenProjection) move and rotate CameraOrigin as needed. 
 * Do the same as in the above step to "compensate" for real-world tracked data. The position and rotation of the real-world camera in relation to the real-world screen should match that of the TrackedCamera in relation to ScreenProjection.
