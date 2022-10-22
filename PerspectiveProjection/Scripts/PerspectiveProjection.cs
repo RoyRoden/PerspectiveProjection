@@ -24,7 +24,6 @@ public class PerspectiveProjection : MonoBehaviour
     {
         if (Application.isPlaying)
         {
-            Debug.Log("start");
             trackedCamera = cameraOrigin.transform.GetChild(0).GetComponent<Camera>();
             // Variable needed later to reference vectors in the WarpPerspective shader and assign matrix transformation coefficients
             material = GetComponent<MeshRenderer>().sharedMaterial;
@@ -45,7 +44,6 @@ public class PerspectiveProjection : MonoBehaviour
 
     private void OnValidate()
     {
-        Debug.Log("onValidate");
         trackedCamera = cameraOrigin.transform.GetChild(0).GetComponent<Camera>();
         // Variable needed later to reference vectors in the WarpPerspective shader and assign matrix transformation coefficients
         material = GetComponent<MeshRenderer>().sharedMaterial;
