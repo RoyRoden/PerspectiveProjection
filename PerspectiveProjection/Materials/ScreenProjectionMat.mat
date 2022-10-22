@@ -8,7 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: ScreenProjectionMat
-  m_Shader: {fileID: -6465566751694194690, guid: a9cba3b44fae5b641a2e8484b2069f8d, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: a9cba3b44fae5b641a2e8484b2069f8d,
+    type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _DISABLE_SSR_TRANSPARENT
@@ -183,8 +184,8 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
-    - _M0: {r: 0.8660269, g: 0, b: 0.066986084, a: 0}
-    - _M1: {r: 0, g: 0.8660252, b: 0.066987395, a: 0}
+    - _M0: {r: 0.86602545, g: 0, b: 0.066987306, a: 0}
+    - _M1: {r: 0, g: 0.86602545, b: 0.066987306, a: 0}
     - _M2: {r: 0, g: 0, b: 1, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _Vector2: {r: 0.11, g: -0.11, b: 0, a: 0}

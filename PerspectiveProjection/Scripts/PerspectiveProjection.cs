@@ -6,7 +6,8 @@ using UnityEngine;
 public class PerspectiveProjection : MonoBehaviour
 {
     [SerializeField]
-    private Camera captureCamera;
+    private GameObject cameraOrigin;
+    private Camera trackedCamera;
     [SerializeField]
     private Camera displayCamera;
     [SerializeField]
@@ -21,6 +22,31 @@ public class PerspectiveProjection : MonoBehaviour
 
     void Start()
     {
+        if (Application.isPlaying)
+        {
+            Debug.Log("start");
+            trackedCamera = cameraOrigin.transform.GetChild(0).GetComponent<Camera>();
+            // Variable needed later to reference vectors in the WarpPerspective shader and assign matrix transformation coefficients
+            material = GetComponent<MeshRenderer>().sharedMaterial;
+
+            // Crate a list of 4 vectors with normalized coordinates of the screen's corners.
+            // NOTE: the order of the values are provided "vertically flipped" to match UV coordinate system (origin at bottom left)
+            srcPts.Add(new Vector2(0, 1));
+            srcPts.Add(new Vector2(1, 1));
+            srcPts.Add(new Vector2(0, 0));
+            srcPts.Add(new Vector2(1, 0));
+
+            // Perform rescaling of local transform and camera origine based on inspector properties
+            transform.localScale = new Vector3(scaleFactor * screenHeight * (float)resolution.x / (float)resolution.y, screenHeight * scaleFactor, screenHeight * scaleFactor);
+            displayCamera.orthographicSize = screenHeight * scaleFactor / 2;
+            cameraOrigin.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+        }
+    }
+
+    private void OnValidate()
+    {
+        Debug.Log("onValidate");
+        trackedCamera = cameraOrigin.transform.GetChild(0).GetComponent<Camera>();
         // Variable needed later to reference vectors in the WarpPerspective shader and assign matrix transformation coefficients
         material = GetComponent<MeshRenderer>().sharedMaterial;
 
@@ -30,28 +56,27 @@ public class PerspectiveProjection : MonoBehaviour
         srcPts.Add(new Vector2(1, 1));
         srcPts.Add(new Vector2(0, 0));
         srcPts.Add(new Vector2(1, 0));
+
+        // Perform rescaling of local transform and camera origine based on inspector properties
+        transform.localScale = new Vector3(scaleFactor * screenHeight * (float)resolution.x / (float)resolution.y, screenHeight * scaleFactor, screenHeight * scaleFactor);
+        displayCamera.orthographicSize = screenHeight * scaleFactor / 2;
+        cameraOrigin.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
     }
 
     void Update()
     {
         // Check captureCamera is different from null
-        if (captureCamera != null)
+        if (trackedCamera != null)
         {
             // Clear the list to only hold current values
             dstPts.Clear();
             // Create a list of destination points
-            dstPts.Add(new Vector2(captureCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5,(float)0.5,0))).x / resolution.x, captureCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)0.5, 0))).y / resolution.y));
-            dstPts.Add(new Vector2(captureCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)0.5, 0))).x / resolution.x, captureCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)0.5, 0))).y / resolution.y));
-            dstPts.Add(new Vector2(captureCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)-0.5, 0))).x / resolution.x, captureCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)-0.5, 0))).y / resolution.y));
-            dstPts.Add(new Vector2(captureCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)-0.5, 0))).x / resolution.x, captureCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)-0.5, 0))).y / resolution.y));
+            dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5,(float)0.5,0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)0.5, 0))).y / resolution.y));
+            dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)0.5, 0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)0.5, 0))).y / resolution.y));
+            dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)-0.5, 0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)-0.5, 0))).y / resolution.y));
+            dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)-0.5, 0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)-0.5, 0))).y / resolution.y));
             WarpPerspective(srcPts, dstPts);
         }
-    }
-
-    private void OnGUI()
-    {
-        transform.localScale = new Vector3(scaleFactor * screenHeight * (float)resolution.x / (float)resolution.y, screenHeight * scaleFactor, 1 * scaleFactor);
-        displayCamera.orthographicSize = screenHeight * scaleFactor / 2;
     }
 
     private void WarpPerspective(List<Vector2> src, List<Vector2> dst)
