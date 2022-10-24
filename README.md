@@ -9,6 +9,7 @@ PerspectiveProjection is a Unity package intended for camera frustum projection,
 
 ## Usage
 ### Installation
+* Create a new layer called "PerspectiveProjection".
 * Import *PerspectiveProjection.unitypackage* into a project.
 * Locate and select the ScreenProjection and CameraOrigin prefaps (PerspectiveProjection > Prefabs) and place both of them in the scene.
 
