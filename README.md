@@ -81,7 +81,8 @@ This package should work with any tracking method (i.e. Vive Tracker) that allow
 ### Projecting on a physical screen
 
 * Set the Game window at full screen on the target physcal display. To remove the top bar there's a handy tool available on the Unity Asset Store called "Fullscreen Editor". Note that this is a paid third party tool - use it at your own risk.
-* Once the Tracked gameobject starts getting real-world position and rotation from the tracker device (i.e. Vive Tracker) you might need to offset its position in the editor. Do so by modifying the position and rotation of CameraOrigin.
+* Once the Tracked gameobject starts getting real-world position and rotation from the tracker device (i.e. Vive Tracker) you might need to offset its position in the editor so that they are "aligned". Do so by modifying the position and rotation of CameraOrigin.
+* It's important to correctly match the relative distance between the camera and the screen between real-world and the Unity scene.
 
 <img width="1387" alt="PerspectiveProjection" src="https://user-images.githubusercontent.com/1048085/197571453-4be71347-4497-4362-bdc8-a0969d0870b5.png">
 
