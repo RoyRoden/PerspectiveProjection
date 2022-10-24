@@ -1,5 +1,3 @@
-<img width="1387" alt="PerspectiveProjection" src="https://user-images.githubusercontent.com/1048085/197571453-4be71347-4497-4362-bdc8-a0969d0870b5.png">
-
 # PerspectiveProjection
 PerspectiveProjection is a Unity package intended for camera frustum projection, a Technique that is used in virtual production to turn LED screens into a backdrop where CG content is projected in real-time. It can be used to give depth to flat screens when captured by a real-world camera which position and rotation are tracked in some way (i.e. Vive Tracker) and passed to a virtual camera within a Unity scene.
 
@@ -22,8 +20,20 @@ The preview below shows a possible result seen from the point-of-view of the rec
 * Locate and select the ScreenProjection and CameraOrigin prefaps (PerspectiveProjection > Prefabs) and place both of them in the scene.
 <img width="340" alt="PerspectiveProjection_prefabs" src="https://user-images.githubusercontent.com/1048085/197573766-0d000705-fa48-4415-931f-79c8a42e0a7a.png">
 
+### Checklist
+* The hierarchy of the gameobjects should look as follows.
+<img width="143" alt="PerspectiveProjection_Hierarchy" src="https://user-images.githubusercontent.com/1048085/197589481-2b81410d-1da2-4444-9b46-86f7e377f45d.png">
+
+* Layer should be set to PerspectiveProjection for all gameobjects with the exception of Debug. Debug should be deactivated unless you need to see the virtual representation of the physical screen (ScreenProjection) in the Game window for debug purposes.
+* One material should be assigned to ScreenProjection (ScreenProjectionMat).
+* One script should also be assigned to ScreenProjection linking properties to the CameraOrigin, TrackedCamera and Display Camera gameobjects as follows.
+
+<img width="330" alt="PerspectiveProjection_Inspector" src="https://user-images.githubusercontent.com/1048085/197590797-1f0da1f0-d450-4ba2-a709-d28bd65e27ac.png">
+
 ### Scale and Resolution
-The ScreenProjection prefab contains a quad that represents the physical screen position and dimension relative to the virtual world. The visible side of the quad represents the front of the physical screent. Use the transform gizmo for positioning the ScreenProjection prefab where preferred. 
+* The ScreenProjection prefab contains a quad that represents the physical screen position and dimension relative to the virtual world. The visible side of the quad represents the front of the physical screent. Use the transform gizmo for positioning the ScreenProjection prefab where preferred.
+<img width="614" alt="PerspectiveProjection_screenprojection" src="https://user-images.githubusercontent.com/1048085/197585630-f73ee71b-ac82-49a8-a698-57f5968d4b3a.png">
+
 **Note:** DO NOT try to resize it by rescaling it (the attached script will prevent so anyways), instead do the following to set resolution and scale:
 
 * In the Project folder, locate and select the RenderTexture named PerspectiveProjectionRT (PerspectiveProjection > Textures) and set its size in the Inspector to match the aspect ration of the physical screen (i.e. 1920x1080 for a Full HD 16:9 screen).
@@ -57,6 +67,11 @@ This package should work with any tracking method (i.e. Vive Tracker) that allow
 * It is unlikely that the position of the tracker device (i.e. Vive Tracker) and the camera's lens are exactly aligned. Apply necessary offset values to the TrackedCamera gameobject.
 <img width="412" alt="PerspectiveProjection_trackedcamera" src="https://user-images.githubusercontent.com/1048085/197583414-e70e20fb-67a0-4e6a-8d39-2f0cff4a4756.png">
 
+### Camera FOV
+* Select TrackedCamera and change its Field of View property to match that of the physical camera.
+<img width="260" alt="PerspectiveProjection_trackedcamera_fov" src="https://user-images.githubusercontent.com/1048085/197592049-8932f3f4-80eb-4d1f-9f2d-8f6db8b73849.png">
+
+* If you don't know the FOV of your camera you can approximate a value and fine tune it later when projecting on the screen.
 
 **Important Notes:**
 * DO NOT try to manually position the camera by moving TrackedCamera, this should only be use for offset values between the physical tracker and the camera lens. ALWAYS use the parent gameobject CameraOrigin for manual positioning.
@@ -65,8 +80,10 @@ This package should work with any tracking method (i.e. Vive Tracker) that allow
 
 ### Projecting on a physical screen
 
-* Set the Game window at full screen on the target physcal display. To remove the top bar there's a handy tool available on the Unity Asset Store called "Fullscreen Editor". Note that this is a paid third party tool so use at your own risk.
-* The DisplayCamera gameobject must not be moved from within ScreenProjection and its Target Display property must be set to that of the Display being used in the full screen Game window (Display 1 by default).
+* Set the Game window at full screen on the target physcal display. To remove the top bar there's a handy tool available on the Unity Asset Store called "Fullscreen Editor". Note that this is a paid third party tool - use it at your own risk.
+* Once the Tracked gameobject starts getting real-world position and rotation from the tracker device (i.e. Vive Tracker) you might need to offset its position in the editor. Do so by modifying the position and rotation of CameraOrigin.
+
+<img width="1387" alt="PerspectiveProjection" src="https://user-images.githubusercontent.com/1048085/197571453-4be71347-4497-4362-bdc8-a0969d0870b5.png">
 
 ## Aknowledgements
 The PerspectiveProjection.cs script contains a snippet from https://rosettacode.org/wiki/Gaussian_elimination available under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/).
