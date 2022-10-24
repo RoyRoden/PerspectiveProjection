@@ -13,6 +13,7 @@ The preview below shows a possible result seen from the point-of-view of the rec
 
 ## Setup
 ### Installation
+* Disable existing cameras in the scene.
 * Create a new layer called "PerspectiveProjection".
 <img width="161" alt="PerspectiveProjection_layer" src="https://user-images.githubusercontent.com/1048085/197573318-261b5d31-f065-4acc-877d-4e5a00cdf9e1.png">
 
