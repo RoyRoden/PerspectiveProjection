@@ -65,7 +65,7 @@ This package should work with any tracking method (i.e. Vive Tracker) that allow
 * Add the necessary component for tracking the real-world position of the camera to the Tracker gameobject (i.e. SteamVR Tracked Object). The position and rotation of Tracker should be zero since it will be overwritten by the added component anyways.
 <img width="413" alt="PerspectiveProjection_tracker" src="https://user-images.githubusercontent.com/1048085/197582821-2c70fab8-ff48-4ae1-ab67-d0ed4614ef89.png">
 
-* It is unlikely that the position of the tracker device (i.e. Vive Tracker) and the camera's lens are exactly aligned. Apply necessary offset values to the TrackedCamera gameobject.
+* It is unlikely that the position of the tracker device (i.e. Vive Tracker) and the camera's lens are exactly aligned. Apply necessary offset values (in meters) to the TrackedCamera gameobject.
 <img width="412" alt="PerspectiveProjection_trackedcamera" src="https://user-images.githubusercontent.com/1048085/197583414-e70e20fb-67a0-4e6a-8d39-2f0cff4a4756.png">
 
 ### Camera FOV
