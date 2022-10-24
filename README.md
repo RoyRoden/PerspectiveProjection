@@ -1,6 +1,10 @@
 # PerspectiveProjection
 PerspectiveProjection is a Unity package intended for camera frustum projection, a Technique that is used in virtual production to turn LED screens into a backdrop where CG content is projected in real-time. It can be used to give depth to flat screens when captured by a real-world camera which position and rotation are tracked in some way (i.e. Vive Tracker) and passed to a virtual camera within a Unity scene.
 
+The preview below shows a possible result seen from the point-of-view of the recording camera (top half) and from an arbitrary point-of-view to illustrate the overall setup (bottom half) - LED Screen as backdrop to physical "actors" and a tracked camera (in this istance, an HTC Vive Tracker attached to a phone).
+
+![PerspectiveProjection_001](https://user-images.githubusercontent.com/1048085/197563133-0d2cea24-2b22-42b5-a9be-5f43c842c3c1.gif)
+
 ## Notes
 * Tested with Unity 2021 LTS HDRP, in Editor and Play mode.
 * Intended for projection onto one single screen (might work with multiple ones with some extra work).
