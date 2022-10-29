@@ -6,7 +6,7 @@ The preview below shows a possible result seen from the point-of-view of the rec
 ![PerspectiveProjection_001](https://user-images.githubusercontent.com/1048085/197563133-0d2cea24-2b22-42b5-a9be-5f43c842c3c1.gif)
 
 ## Notes
-* Tested with Unity 2021 LTS HDRP, in Editor and Play mode.
+* Tested with Unity 2021 LTS HDRP, in Editor and Play mode, on a gaming laptop with an RTX 2080 graphics card.
 * Intended for projection onto one single screen (might work with multiple ones with some extra work).
 * This solution does not rely on any particular camera tracking method which must be implemented separately.
 * It is NOT intended for production work, is an explorative project and it hasn't been thoroughly tested.
