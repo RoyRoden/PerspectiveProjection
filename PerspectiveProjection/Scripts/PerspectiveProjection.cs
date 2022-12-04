@@ -57,7 +57,10 @@ public class PerspectiveProjection : MonoBehaviour
         // Perform rescaling of local transform and camera origine based on inspector properties
         transform.localScale = new Vector3(scaleFactor * screenHeight * (float)resolution.x / (float)resolution.y, screenHeight * scaleFactor, screenHeight * scaleFactor);
         displayCamera.orthographicSize = screenHeight * scaleFactor / 2;
-        cameraOrigin.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+        if (cameraOrigin != null)
+        {
+            cameraOrigin.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+        }
     }
 
     void Update()
