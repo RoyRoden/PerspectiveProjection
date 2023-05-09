@@ -63,6 +63,13 @@ public class PerspectiveProjection : MonoBehaviour
         }
     }
 
+    public void SetVectors(double[] M)
+    {
+        material.SetVector("_M0", new Vector3((float)M[0], (float)M[1], (float)M[2]));
+        material.SetVector("_M1", new Vector3((float)M[3], (float)M[4], (float)M[5]));
+        material.SetVector("_M2", new Vector3((float)M[6], (float)M[7], 1f));
+    }
+
     void Update()
     {
         // Check captureCamera is different from null
@@ -75,209 +82,97 @@ public class PerspectiveProjection : MonoBehaviour
             dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)0.5, 0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)0.5, 0))).y / resolution.y));
             dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)-0.5, 0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)-0.5, 0))).y / resolution.y));
             dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)-0.5, 0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)-0.5, 0))).y / resolution.y));
-            WarpPerspective(srcPts, dstPts);
+
+            // Run perspective transform passing source and destination points
+            // and set the transformation matrix in the shader
+            SetVectors(PerspectiveTransform(srcPts, dstPts));
         }
     }
 
-    private void WarpPerspective(List<Vector2> src, List<Vector2> dst)
+    // Perspective Transform
+    private double[] PerspectiveTransform(List<Vector2> src, List<Vector2> dst)
     {
-        Vector B = new Vector(8);
-        Matrix A = new Matrix(8, 8);
+        double[,] A = new double[8, 8];
+        double[] B = new double[8];
+        double[] X;
 
-        // Below algorithm to populate the A and B is based on the OpenCV library getPerspectiveTransform code from (https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/imgwarp.cpp)
+        // Algorithm to populate the A and B arrays is based on the OpenCV library getPerspectiveTransform code from (https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/imgwarp.cpp)
         for (int i = 0; i < 4; i++)
         {
-            A[i, 0] = A[i+4, 3] = src[i].x;
-            A[i, 1] = A[i+4, 4] = src[i].y;
-            A[i, 2] = A[i+4, 5] = 1;
-            A[i, 3] = A[i, 4] = A[i, 5] = A[i+4, 0] = A[i+4, 1] = A[i+4, 2] = 0;
-            A[i, 6] = -src[i].x*dst[i].x;
-            A[i, 7] = -src[i].y*dst[i].x;
-            A[i+4, 6] = -src[i].x*dst[i].y;
-            A[i+4, 7] = -src[i].y*dst[i].y;
+            A[i, 0] = A[i + 4, 3] = src[i].x;
+            A[i, 1] = A[i + 4, 4] = src[i].y;
+            A[i, 2] = A[i + 4, 5] = 1;
+            A[i, 3] = A[i, 4] = A[i, 5] = A[i + 4, 0] = A[i + 4, 1] = A[i + 4, 2] = 0;
+            A[i, 6] = -src[i].x * dst[i].x;
+            A[i, 7] = -src[i].y * dst[i].x;
+            A[i + 4, 6] = -src[i].x * dst[i].y;
+            A[i + 4, 7] = -src[i].y * dst[i].y;
             B[i] = dst[i].x;
-            B[i+4] = dst[i].y;
+            B[i + 4] = dst[i].y;
         }
 
         // Perform Gaussian Elimination
-        A.ElimPartial(B);
-        
-        // Create three vectors to hold the rows of generated transformation matrix
-        Vector3 M0 = new Vector3((float)B[0], (float)B[1], (float)B[2]);
-        Vector3 M1 = new Vector3((float)B[3], (float)B[4], (float)B[5]);
-        Vector3 M2 = new Vector3((float)B[6], (float)B[7], 1);
+        X = GaussianElimination(A, B);
 
-        // Set the output coefficients in the WarpPespective shader to calculate new UV coordinates for sampling the camera's RenderTexture
-        material.SetVector("_M0", M0);
-        material.SetVector("_M1", M1);
-        material.SetVector("_M2", M2);
+        return X;
     }
 
-    // Start of Gaussian Elimination code from https://rosettacode.org/wiki/Gaussian_elimination available under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/)
-    internal class Vector
+    // Gaussian Elimination
+    public double[] GaussianElimination(double[,] A, double[] B)
     {
-        private double[] b;
-        internal readonly int rows;
+        int N = B.Length;
 
-        internal Vector(int rows)
+        for (int p = 0; p < N; p++)
         {
-            this.rows = rows;
-            b = new double[rows];
-        }
-
-        internal Vector(double[] initArray)
-        {
-            b = (double[])initArray.Clone();
-            rows = b.Length;
-        }
-
-        internal Vector Clone()
-        {
-            Vector v = new Vector(b);
-            return v;
-        }
-
-        internal double this[int row]
-        {
-            get { return b[row]; }
-            set { b[row] = value; }
-        }
-
-        internal void SwapRows(int r1, int r2)
-        {
-            if (r1 == r2) return;
-            double tmp = b[r1];
-            b[r1] = b[r2];
-            b[r2] = tmp;
-        }
-
-        internal double norm(double[] weights)
-        {
-            double sum = 0;
-            for (int i = 0; i < rows; i++)
+            // find pivot row and swap
+            int max = p;
+            for (int i = p + 1; i < N; i++)
             {
-                double d = b[i] * weights[i];
-                sum += d * d;
-            }
-            return Math.Sqrt(sum);
-        }
-
-        internal void print()
-        {
-            for (int i = 0; i < rows; i++)
-                Debug.Log(b[i]);
-        }
-
-        public static Vector operator -(Vector lhs, Vector rhs)
-        {
-            Vector v = new Vector(lhs.rows);
-            for (int i = 0; i < lhs.rows; i++)
-                v[i] = lhs[i] - rhs[i];
-            return v;
-        }
-    }
-
-    class Matrix
-    {
-        private double[] b;
-        internal readonly int rows, cols;
-
-        internal Matrix(int rows, int cols)
-        {
-            this.rows = rows;
-            this.cols = cols;
-            b = new double[rows * cols];
-        }
-
-        internal Matrix(int size)
-        {
-            this.rows = size;
-            this.cols = size;
-            b = new double[rows * cols];
-            for (int i = 0; i < size; i++)
-                this[i, i] = 1;
-        }
-
-        internal Matrix(int rows, int cols, double[] initArray)
-        {
-            this.rows = rows;
-            this.cols = cols;
-            b = (double[])initArray.Clone();
-            if (b.Length != rows * cols) throw new Exception("bad init array");
-        }
-
-        internal double this[int row, int col]
-        {
-            get { return b[row * cols + col]; }
-            set { b[row * cols + col] = value; }
-        }
-
-        public static Vector operator *(Matrix lhs, Vector rhs)
-        {
-            if (lhs.cols != rhs.rows) throw new Exception("I can't multiply matrix by vector");
-            Vector v = new Vector(lhs.rows);
-            for (int i = 0; i < lhs.rows; i++)
-            {
-                double sum = 0;
-                for (int j = 0; j < rhs.rows; j++)
-                    sum += lhs[i, j] * rhs[j];
-                v[i] = sum;
-            }
-            return v;
-        }
-
-        internal void SwapRows(int r1, int r2)
-        {
-            if (r1 == r2) return;
-            int firstR1 = r1 * cols;
-            int firstR2 = r2 * cols;
-            for (int i = 0; i < cols; i++)
-            {
-                double tmp = b[firstR1 + i];
-                b[firstR1 + i] = b[firstR2 + i];
-                b[firstR2 + i] = tmp;
-            }
-        }
-
-        internal void ElimPartial(Vector B)
-        {
-            for (int diag = 0; diag < rows; diag++)
-            {
-                int max_row = diag;
-                double max_val = Math.Abs(this[diag, diag]);
-                double d;
-                for (int row = diag + 1; row < rows; row++)
-                    if ((d = Math.Abs(this[row, diag])) > max_val)
-                    {
-                        max_row = row;
-                        max_val = d;
-                    }
-                SwapRows(diag, max_row);
-                B.SwapRows(diag, max_row);
-                double invd = 1 / this[diag, diag];
-                for (int col = diag; col < cols; col++)
-                    this[diag, col] *= invd;
-                B[diag] *= invd;
-                for (int row = 0; row < rows; row++)
+                if (Math.Abs(A[i, p]) > Math.Abs(A[max, p]))
                 {
-                    d = this[row, diag];
-                    if (row != diag)
-                    {
-                        for (int col = diag; col < cols; col++)
-                            this[row, col] -= d * this[diag, col];
-                        B[row] -= d * B[diag];
-                    }
+                    max = i;
+                }
+            }
+            double[] temp = new double[N];
+            for (int i = 0; i < N; i++)
+            {
+                temp[i] = A[p, i];
+                A[p, i] = A[max, i];
+                A[max, i] = temp[i];
+            }
+            double t = B[p];
+            B[p] = B[max];
+            B[max] = t;
+
+            // singular or nearly singular
+            if (Math.Abs(A[p, p]) <= double.Epsilon)
+            {
+                throw new Exception("Matrix is singular or nearly singular");
+            }
+
+            // pivot within A and B
+            for (int i = p + 1; i < N; i++)
+            {
+                double alpha = A[i, p] / A[p, p];
+                B[i] -= alpha * B[p];
+                for (int j = p; j < N; j++)
+                {
+                    A[i, j] -= alpha * A[p, j];
                 }
             }
         }
 
-        internal void print()
+        // back substitution
+        double[] X = new double[N];
+        for (int i = N - 1; i >= 0; i--)
         {
-            for (int i = 0; i < rows; i++)
+            double sum = 0.0;
+            for (int j = i + 1; j < N; j++)
             {
-                for (int j = 0; j < cols; j++)
-                    Debug.Log(this[i, j].ToString() + "  ");
+                sum += A[i, j] * X[j];
             }
+            X[i] = (B[i] - sum) / A[i, i];
         }
+        return X;
     }
 }
