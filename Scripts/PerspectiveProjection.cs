@@ -17,75 +17,94 @@ public class PerspectiveProjection : MonoBehaviour
     private float screenHeight;
     [SerializeField]
     private float scaleFactor;
+
     private List<Vector2> srcPts = new List<Vector2>();
     private List<Vector2> dstPts = new List<Vector2>();
     private Material material;
 
-    void Start()
+    private void Awake()
     {
-        if (Application.isPlaying)
+        material = GetComponent<MeshRenderer>().sharedMaterial;
+    }
+
+    private void Start()
+    {
+        if (Application.isPlaying && trackedCamera != null && material != null && displayCamera != null && cameraOrigin != null)
         {
-            // Variable needed later to reference vectors in the WarpPerspective shader and assign matrix transformation coefficients
-            material = GetComponent<MeshRenderer>().sharedMaterial;
-
-            // Crate a list of 4 vectors with normalized coordinates of the screen's corners.
-            // NOTE: the order of the values are provided "vertically flipped" to match UV coordinate system (origin at bottom left)
-            srcPts.Add(new Vector2(0, 1));
-            srcPts.Add(new Vector2(1, 1));
-            srcPts.Add(new Vector2(0, 0));
-            srcPts.Add(new Vector2(1, 0));
-
-            // Perform rescaling of local transform and camera origine based on inspector properties
-            transform.localScale = new Vector3(scaleFactor * screenHeight * (float)resolution.x / (float)resolution.y, screenHeight * scaleFactor, screenHeight * scaleFactor);
-            displayCamera.orthographicSize = screenHeight * scaleFactor / 2;
-            cameraOrigin.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+            InitializePerspectiveTransform();
         }
     }
 
     private void OnValidate()
     {
-        // Variable needed later to reference vectors in the WarpPerspective shader and assign matrix transformation coefficients
-        material = GetComponent<MeshRenderer>().sharedMaterial;
-
-        // Crate a list of 4 vectors with normalized coordinates of the screen's corners.
-        // NOTE: the order of the values are provided "vertically flipped" to match UV coordinate system (origin at bottom left)
-        srcPts.Add(new Vector2(0, 1));
-        srcPts.Add(new Vector2(1, 1));
-        srcPts.Add(new Vector2(0, 0));
-        srcPts.Add(new Vector2(1, 0));
-
-        // Perform rescaling of local transform and camera origine based on inspector properties
-        transform.localScale = new Vector3(scaleFactor * screenHeight * (float)resolution.x / (float)resolution.y, screenHeight * scaleFactor, screenHeight * scaleFactor);
-        displayCamera.orthographicSize = screenHeight * scaleFactor / 2;
-        if (cameraOrigin != null)
-        {
-            cameraOrigin.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
-        }
+        InitializePerspectiveTransform();
     }
 
-    public void SetVectors(double[] M)
+    private void Update()
+    {
+        UpdateDestinationPoints();
+        SetPerspectiveTransformMatrix(PerspectiveTransform(srcPts, dstPts));
+    }
+
+    private void SetPerspectiveTransformMatrix(double[] M)
     {
         material.SetVector("_M0", new Vector3((float)M[0], (float)M[1], (float)M[2]));
         material.SetVector("_M1", new Vector3((float)M[3], (float)M[4], (float)M[5]));
         material.SetVector("_M2", new Vector3((float)M[6], (float)M[7], 1f));
     }
 
-    void Update()
+    private void InitializePerspectiveTransform()
     {
-        // Check captureCamera is different from null
-        if (trackedCamera != null)
-        {
-            // Clear the list to only hold current values
-            dstPts.Clear();
-            // Create a list of destination points
-            dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5,(float)0.5,0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)0.5, 0))).y / resolution.y));
-            dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)0.5, 0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)0.5, 0))).y / resolution.y));
-            dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)-0.5, 0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)-0.5, (float)-0.5, 0))).y / resolution.y));
-            dstPts.Add(new Vector2(trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)-0.5, 0))).x / resolution.x, trackedCamera.WorldToScreenPoint(transform.TransformPoint(new Vector3((float)0.5, (float)-0.5, 0))).y / resolution.y));
+        CreateSourcePoints();
+        SetScaleAndOrthographicSize();
+    }
 
-            // Run perspective transform passing source and destination points
-            // and set the transformation matrix in the shader
-            SetVectors(PerspectiveTransform(srcPts, dstPts));
+    private void CreateSourcePoints()
+    {
+        // Clear the list
+        srcPts.Clear();
+        // Create a list of 4 vectors with normalized coordinates of the screen's corners.
+        // NOTE: the order of the values are provided "vertically flipped" to match UV coordinate system (origin at bottom left)
+        srcPts.Add(new Vector2(0, 1));
+        srcPts.Add(new Vector2(1, 1));
+        srcPts.Add(new Vector2(0, 0));
+        srcPts.Add(new Vector2(1, 0));
+    }
+
+    private void UpdateDestinationPoints()
+    {
+        // Clear the list to only hold current values
+        dstPts.Clear();
+
+        // Create a list of normalized screen corners position in world space
+        var points = new List<Vector3>
+        {
+            new Vector3(-0.5f, 0.5f, 0),
+            new Vector3(0.5f, 0.5f, 0),
+            new Vector3(-0.5f, -0.5f, 0),
+            new Vector3(0.5f, -0.5f, 0)
+        };
+
+        // Fill a list of destination points with the screen corners coordinates in camera space
+        foreach (var point in points)
+        {
+            dstPts.Add(ScreenPointToNormalized(trackedCamera.WorldToScreenPoint(transform.TransformPoint(point))));
+        }
+    }
+
+    private Vector2 ScreenPointToNormalized(Vector3 screenPoint)
+    {
+        return new Vector2(screenPoint.x / resolution.x, screenPoint.y / resolution.y);
+    }
+
+    private void SetScaleAndOrthographicSize()
+    {
+        // Perform rescaling of local transform and camera origin based on inspector properties
+        transform.localScale = new Vector3(scaleFactor * screenHeight * (float)resolution.x / (float)resolution.y, screenHeight * scaleFactor, screenHeight * scaleFactor);
+        displayCamera.orthographicSize = screenHeight * scaleFactor / 2;
+        if (cameraOrigin != null)
+        {
+            cameraOrigin.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
         }
     }
 
@@ -118,9 +137,9 @@ public class PerspectiveProjection : MonoBehaviour
     }
 
     // Gaussian Elimination
-    public double[] GaussianElimination(double[,] A, double[] B)
+    private double[] GaussianElimination(double[,] A, double[] B)
     {
-        int N = B.Length;
+       var N = B.Length;
 
         for (int p = 0; p < N; p++)
         {
@@ -147,7 +166,7 @@ public class PerspectiveProjection : MonoBehaviour
             // singular or nearly singular
             if (Math.Abs(A[p, p]) <= double.Epsilon)
             {
-                throw new Exception("Matrix is singular or nearly singular");
+                throw new InvalidOperationException("Matrix is singular or nearly singular");
             }
 
             // pivot within A and B
