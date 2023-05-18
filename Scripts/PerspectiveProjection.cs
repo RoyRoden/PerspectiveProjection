@@ -6,16 +6,13 @@ using UnityEngine;
 public class PerspectiveProjection : MonoBehaviour
 {
     [SerializeField]
+    private PerspectiveProjectionSettings settings;
+
     private GameObject cameraOrigin;
-    [SerializeField]
     private Camera trackedCamera;
-    [SerializeField]
     private Camera displayCamera;
-    [SerializeField]
     private Vector2Int resolution;
-    [SerializeField, Tooltip("screen width in meters")]
     private float screenHeight;
-    [SerializeField]
     private float scaleFactor;
 
     private List<Vector2> srcPts = new List<Vector2>();
@@ -24,6 +21,13 @@ public class PerspectiveProjection : MonoBehaviour
 
     private void Awake()
     {
+        cameraOrigin = settings.cameraOrigin;
+        trackedCamera = settings.trackedCamera;
+        displayCamera = settings.displayCamera;
+        resolution = settings.resolution;
+        screenHeight = settings.screenHeight;
+        scaleFactor = settings.scaleFactor;
+
         material = GetComponent<MeshRenderer>().sharedMaterial;
     }
 

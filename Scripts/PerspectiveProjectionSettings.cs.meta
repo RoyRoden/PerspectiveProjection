@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5243d06f9c403674e923ba38693ee38f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - cameraOrigin: {instanceID: 0}
+  - trackedCamera: {instanceID: 0}
+  - displayCamera: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
