@@ -87,8 +87,5 @@ This package should work with any tracking method (i.e. Vive Tracker) that allow
 
 <img width="1387" alt="PerspectiveProjection" src="https://user-images.githubusercontent.com/1048085/197571453-4be71347-4497-4362-bdc8-a0969d0870b5.png">
 
-## Acknowledgements
-The PerspectiveProjection.cs script contains a snippet from https://rosettacode.org/wiki/Gaussian_elimination available under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/).
-
 ## License
 [Unlicense license](https://unlicense.org/)
